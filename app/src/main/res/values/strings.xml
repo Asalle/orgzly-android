@@ -22,6 +22,7 @@
     <string name="edit">Edit</string>
     <string name="edit_note">Edit note</string>
     <string name="delete">Delete</string>
+    <string name="show_diff">Show Diff</string>
     <string name="delete_with_quoted_argument">Delete “%s”</string>
     <string name="name">Name</string>
     <string name="value">Value</string>

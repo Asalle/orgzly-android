@@ -11,6 +11,8 @@ import com.orgzly.android.repos.GitRepo;
 import com.orgzly.android.util.MiscUtils;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
@@ -22,12 +24,16 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.List;
 
 public class GitFileSynchronizer {
     private static String TAG = GitFileSynchronizer.class.getSimpleName();
@@ -329,5 +335,28 @@ public class GitFileSynchronizer {
     public boolean fileMatchesInRevisions(String pathString, RevCommit start, RevCommit end)
             throws IOException {
         return getFileRevision(pathString, start).equals(getFileRevision(pathString, end));
+    }
+
+    public void getDiff(ObjectId fileRevision, RevCommit revision) {
+        try {
+            ObjectId oldHead = currentHead().toObjectId(); // aka local
+            ObjectId head = revision.toObjectId(); // aka remote
+            Repository repository = git.getRepository();
+            try (ObjectReader reader = repository.newObjectReader()) {
+                CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+                oldTreeIter.reset(reader, oldHead);
+                CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+                newTreeIter.reset(reader, head);
+
+                List<DiffEntry> diffs = git.diff().setNewTree(newTreeIter).setOldTree(oldTreeIter).call();
+
+                for (DiffEntry entry : diffs) {
+                    Log.e(TAG, "Entry: " + entry);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

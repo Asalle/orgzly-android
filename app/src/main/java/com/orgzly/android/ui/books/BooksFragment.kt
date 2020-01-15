@@ -36,6 +36,7 @@ import com.orgzly.android.usecase.BookDelete
 import com.orgzly.android.util.LogUtils
 import com.orgzly.android.util.MiscUtils
 import com.orgzly.databinding.DialogBookDeleteBinding
+import com.orgzly.databinding.DialogBookDiffBinding
 import com.orgzly.databinding.DialogBookRenameBinding
 import com.orgzly.databinding.FragmentBooksBinding
 import javax.inject.Inject
@@ -197,6 +198,10 @@ class BooksFragment : Fragment(), Fab, DrawerItem, OnViewHolderClickListener<Boo
                         viewModel.deleteBookRequest(bookId)
                     }
 
+                    R.id.books_context_menu_show_diff -> {
+                        viewModel.diffBookRequest(bookId)
+                    }
+
                     else -> {
                     }
                 }
@@ -280,6 +285,28 @@ class BooksFragment : Fragment(), Fab, DrawerItem, OnViewHolderClickListener<Boo
         }
 
         dialog = builder.show()
+    }
+
+    private fun showBookDiffDialog(book: BookView) {
+        val dialogBinding = DialogBookDiffBinding.inflate(LayoutInflater.from(context))
+
+        dialogBinding.book.setText("Local book")
+        dialogBinding.rook.setText("Remote book")
+
+
+        val dialogBuilder = AlertDialog.Builder(context)
+                .setTitle(getString(R.string.rename_book, MiscUtils.quotedString(book.book.name)))
+                .setView(dialogBinding.root)
+
+        val d = dialogBuilder.create()
+
+        d.setOnDismissListener { ActivityUtils.closeSoftKeyboard(activity) }
+
+        d.show()
+
+        d.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
+
+        dialog = d
     }
 
     private fun renameBookDialog(book: BookView) {
@@ -382,6 +409,13 @@ class BooksFragment : Fragment(), Fab, DrawerItem, OnViewHolderClickListener<Boo
                 renameBookDialog(bookView)
             }
         })
+
+        viewModel.bookDiffRequestEvent.observeSingle(viewLifecycleOwner, Observer { bookView ->
+            if (bookView != null) {
+                showBookDiffDialog(bookView)
+            }
+        })
+
 
         viewModel.bookExportRequestEvent.observeSingle(viewLifecycleOwner, Observer { (book, format) ->
             listener?.onBookExportRequest(book, format)
