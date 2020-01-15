@@ -26,6 +26,8 @@ class BooksViewModel(private val dataRepository: DataRepository) : CommonViewMod
 
     val bookRenameRequestEvent: SingleLiveEvent<BookView> = SingleLiveEvent()
 
+    val bookDiffRequestEvent: SingleLiveEvent<BookView> = SingleLiveEvent()
+
     val bookExportRequestEvent: SingleLiveEvent<Pair<Book, BookFormat>> = SingleLiveEvent()
 
     enum class ViewState {
@@ -74,6 +76,12 @@ class BooksViewModel(private val dataRepository: DataRepository) : CommonViewMod
     fun renameBookRequest(bookId: Long) {
         App.EXECUTORS.diskIO().execute {
             bookRenameRequestEvent.postValue(dataRepository.getBookView(bookId))
+        }
+    }
+
+    fun diffBookRequest(bookId: Long) {
+        App.EXECUTORS.diskIO().execute {
+            bookDiffRequestEvent.postValue(dataRepository.getBookView(bookId))
         }
     }
 
