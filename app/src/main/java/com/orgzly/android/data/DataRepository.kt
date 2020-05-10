@@ -153,17 +153,12 @@ class DataRepository @Inject constructor(
         val repo = getRepoInstance(repoEntity.id, repoEntity.type, repoEntity.url)
 
         val tmpFile = getTempBookFile()
-        try {
-            /* Write to temporary file. */
-            NotesOrgExporter(this).exportBook(bookView.book, tmpFile)
 
-            /* Upload to repo. */
-            uploadedBook = repo.storeBook(tmpFile, fileName)
+        /* Write to temporary file. */
+        NotesOrgExporter(this).exportBook(bookView.book, tmpFile)
 
-        } finally {
-            /* Delete temporary file. */
-            tmpFile.delete()
-        }
+        /* Upload to repo. */
+        uploadedBook = repo.storeBook(tmpFile, fileName)
 
         updateBookLinkAndSync(bookView.book.id, uploadedBook)
 
@@ -1555,18 +1550,14 @@ class DataRepository @Inject constructor(
         val repo = getRepoInstance(repoId, repoType, repoUrl)
 
         val tmpFile = getTempBookFile()
-        try {
-            /* Download from repo. */
-            val vrook = repo.retrieveBook(fileName, tmpFile)
 
-            val bookName = BookName.fromFileName(fileName)
+         /* Download from repo. */
+         val vrook = repo.retrieveBook(fileName, tmpFile)
+         val bookName = BookName.fromFileName(fileName)
 
-            /* Store from file to Shelf. */
-            book = loadBookFromFile(bookName.name, bookName.format, tmpFile, vrook)
+         /* Store from file to Shelf. */
+         book = loadBookFromFile(bookName.name, bookName.format, tmpFile, vrook)
 
-        } finally {
-            tmpFile.delete()
-        }
 
         return book
     }
